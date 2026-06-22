@@ -222,10 +222,11 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   bubble: {
-    maxWidth: "75%",
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+  maxWidth: "75%",
+  minWidth: 180, // ← agrega esta línea
+  borderRadius: 16,
+  paddingHorizontal: 14,
+  paddingVertical: 10,
   },
   otherBubble: {
     backgroundColor: "#242424",

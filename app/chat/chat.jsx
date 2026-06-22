@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -34,10 +35,12 @@ export default function Chat() {
     enviarMensaje,
     emitirEscribiendo,
     quienEscribe,
+    reportarMensaje,
   } = useChat();
 
   const [textoInput, setTextoInput] = useState("");
   const [mostrarChat, setMostrarChat] = useState(false);
+  const [msgMenuAbierto, setMsgMenuAbierto] = useState(null); // id del msg con menu abierto
 
   const amigos = contactos.filter((item) => item.tipo === "amigo");
   const grupos  = contactos.filter((item) => item.tipo === "grupo");
@@ -49,6 +52,7 @@ export default function Chat() {
 
   const handleVolver = () => {
     setMostrarChat(false);
+    setMsgMenuAbierto(null);
   };
 
   const handleEnviar = () => {
@@ -56,6 +60,25 @@ export default function Chat() {
     enviarMensaje(textoInput.trim());
     setTextoInput("");
     emitirEscribiendo(false);
+  };
+
+  const handleReportar = (msg) => {
+    Alert.alert(
+      "Reportar mensaje",
+      `¿Quieres reportar este mensaje?\n\n"${msg.texto}"`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Reportar",
+          style: "destructive",
+          onPress: () => {
+            reportarMensaje(msg.id);
+            setMsgMenuAbierto(null);
+            Alert.alert("✅ Reportado", "Tu reporte fue enviado.");
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -165,11 +188,48 @@ export default function Chat() {
                     textStyle={styles.initialAvatarMessageText}
                   />
                 )}
-                <View style={[styles.bubble, msg.mio ? styles.myBubble : styles.otherBubble]}>
-                  <Text style={styles.messageText}>{msg.texto}</Text>
-                  <Text style={styles.messageTime}>
-                    {msg.hora} {msg.mio ? "✓✓" : ""}
-                  </Text>
+
+                <View style={{ maxWidth: "75%" }}>
+                  {/* Burbuja del mensaje — long press abre el menú */}
+                  <TouchableOpacity
+                    onLongPress={() => setMsgMenuAbierto(msg.id === msgMenuAbierto ? null : msg.id)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={[styles.bubble, msg.mio ? styles.myBubble : styles.otherBubble,
+                      msg.eliminado && { opacity: 0.5 }
+                    ]}>
+                      <Text style={[styles.messageText, msg.eliminado && { fontStyle: "italic" }]}>
+                        {msg.texto}
+                      </Text>
+                      <Text style={styles.messageTime}>
+                        {msg.hora} {msg.mio ? "✓✓" : ""}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  {/* Menú de reporte — aparece al hacer long press */}
+                  {msgMenuAbierto === msg.id && !msg.eliminado && (
+                    <TouchableOpacity
+                      onPress={() => handleReportar(msg)}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: "#1a1a1a",
+                        borderRadius: 8,
+                        paddingHorizontal: 10,
+                        paddingVertical: 6,
+                        marginTop: 4,
+                        alignSelf: msg.mio ? "flex-end" : "flex-start",
+                        borderWidth: 1,
+                        borderColor: "#E60023",
+                      }}
+                    >
+                      <Ionicons name="flag-outline" size={14} color="#E60023" />
+                      <Text style={{ color: "#E60023", fontSize: 12, marginLeft: 5 }}>
+                        Reportar mensaje
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             ))}

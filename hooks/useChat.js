@@ -12,6 +12,7 @@ export function useChat() {
     conectado,
     quienEscribe,
     reportarMensaje,
+    eliminarMensaje,
   } = useChats();
 
   return {
@@ -25,5 +26,6 @@ export function useChat() {
     conectado,
     quienEscribe,
     reportarMensaje,
+    eliminarMensaje,
   };
 }

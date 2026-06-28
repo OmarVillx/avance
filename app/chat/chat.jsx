@@ -36,6 +36,7 @@ export default function Chat() {
     emitirEscribiendo,
     quienEscribe,
     reportarMensaje,
+    eliminarMensaje,
   } = useChat();
 
   const [textoInput, setTextoInput] = useState("");
@@ -80,7 +81,30 @@ export default function Chat() {
       ]
     );
   };
-
+  const handleEliminar = (msg) => {
+    Alert.alert(
+      "Eliminar mensaje",
+      "¿Para quién quieres eliminar este mensaje?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar para mí",
+          onPress: () => {
+            eliminarMensaje(msg.id, false);
+            setMsgMenuAbierto(null);
+          },
+        },
+        {
+          text: "Eliminar para todos",
+          style: "destructive",
+          onPress: () => {
+            eliminarMensaje(msg.id, true);
+            setMsgMenuAbierto(null);
+          },
+        },
+      ]
+    );
+  };
   return (
     <SafeAreaView style={styles.container}>
       {/* HEADER */}
@@ -207,32 +231,57 @@ export default function Chat() {
                     </View>
                   </TouchableOpacity>
 
-                  {/* Menú de reporte — aparece al hacer long press */}
+                  {/* Menú — aparece al hacer long press */}
                   {msgMenuAbierto === msg.id && !msg.eliminado && (
-                    <TouchableOpacity
-                      onPress={() => handleReportar(msg)}
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        backgroundColor: "#1a1a1a",
-                        borderRadius: 8,
-                        paddingHorizontal: 10,
-                        paddingVertical: 6,
-                        marginTop: 4,
-                        alignSelf: msg.mio ? "flex-end" : "flex-start",
-                        borderWidth: 1,
-                        borderColor: "#E60023",
-                      }}
-                    >
-                      <Ionicons name="flag-outline" size={14} color="#E60023" />
-                      <Text style={{ color: "#E60023", fontSize: 12, marginLeft: 5 }}>
-                        Reportar mensaje
-                      </Text>
-                    </TouchableOpacity>
+                    <View style={{ alignSelf: msg.mio ? "flex-end" : "flex-start" }}>
+                      {/* Reportar — para todos */}
+                      <TouchableOpacity
+                        onPress={() => handleReportar(msg)}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          backgroundColor: "#1a1a1a",
+                          borderRadius: 8,
+                          paddingHorizontal: 10,
+                          paddingVertical: 6,
+                          marginTop: 4,
+                          borderWidth: 1,
+                          borderColor: "#E60023",
+                        }}
+                      >
+                        <Ionicons name="flag-outline" size={14} color="#E60023" />
+                        <Text style={{ color: "#E60023", fontSize: 12, marginLeft: 5 }}>
+                          Reportar mensaje
+                        </Text>
+                      </TouchableOpacity>
+
+                      {/* Eliminar — solo si es tuyo */}
+                      {msg.mio && (
+                        <TouchableOpacity
+                          onPress={() => handleEliminar(msg)}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            backgroundColor: "#1a1a1a",
+                            borderRadius: 8,
+                            paddingHorizontal: 10,
+                            paddingVertical: 6,
+                            marginTop: 4,
+                            borderWidth: 1,
+                            borderColor: "#555",
+                          }}
+                        >
+                          <Ionicons name="trash-outline" size={14} color="#aaa" />
+                          <Text style={{ color: "#aaa", fontSize: 12, marginLeft: 5 }}>
+                            Eliminar mensaje
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   )}
-                </View>
-              </View>
-            ))}
+                  </View>
+                  </View>
+                  ))}
 
             {quienEscribe && (
               <View style={[styles.messageRow, styles.messageLeft]}>

@@ -52,8 +52,20 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
         );
         return { ...prev, [chatId]: actualizados };
       });
+      
     });
-
+    // ── Mensaje eliminado por el usuario ─────────────────────────
+    socket.on("mensaje:eliminadoPorUsuario", ({ msgId, chatId, texto }) => {
+      setConversaciones((prev) => {
+        const msgs = prev[chatId] || [];
+        const actualizados = msgs.map((m) =>
+          String(m.id) === String(msgId)
+            ? { ...m, texto, eliminado: true }
+            : m
+        );
+        return { ...prev, [chatId]: actualizados };
+      });
+    });
     socket.on("presencia:cambio", ({ userId: uid, estado }) => {
       setContactos((prev) =>
         prev.map((c) => (String(c.id) === String(uid) ? { ...c, estado } : c))
@@ -116,7 +128,18 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
     },
     [chatActivo]
   );
-
+  const eliminarMensaje = useCallback(
+    (msgId, paraTodos) => {
+      const socket = getSocket();
+      if (!socket || !chatActivo) return;
+      socket.emit("mensaje:eliminar", {
+        msgId,
+        chatId: chatActivo.id,
+        paraTodos,
+      });
+    },
+    [chatActivo]
+  );
   const mensajesActuales = chatActivo
     ? conversaciones[chatActivo.id] || []
     : [];
@@ -126,17 +149,18 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
   return (
     <ChatContext.Provider
       value={{
-        contactos,
-        conversaciones,
-        chatActivo,
-        setChatActivo,
-        mensajesActuales,
-        enviarMensaje,
-        emitirEscribiendo,
-        reportarMensaje, // ← nuevo
-        conectado,
-        quienEscribe,
-      }}
+      contactos,
+      conversaciones,
+      chatActivo,
+      setChatActivo,
+      mensajesActuales,
+      enviarMensaje,
+      emitirEscribiendo,
+      reportarMensaje,
+      eliminarMensaje, // ← nueva
+      conectado,
+      quienEscribe,
+    }}
     >
       {children}
     </ChatContext.Provider>

@@ -37,6 +37,7 @@ export default function Chat() {
     quienEscribe,
     reportarMensaje,
     eliminarMensaje,
+    reaccionarMensaje,
   } = useChat();
 
   const [textoInput, setTextoInput] = useState("");
@@ -213,7 +214,7 @@ export default function Chat() {
                   />
                 )}
 
-                <View style={{ maxWidth: "75%" }}>
+                <View style={{ maxWidth: "100%" }}>
                   {/* Burbuja del mensaje — long press abre el menú */}
                   <TouchableOpacity
                     onLongPress={() => setMsgMenuAbierto(msg.id === msgMenuAbierto ? null : msg.id)}
@@ -230,10 +231,57 @@ export default function Chat() {
                       </Text>
                     </View>
                   </TouchableOpacity>
-
+              {/* Reacciones */}
+              {msg.reacciones && Object.keys(msg.reacciones).length > 0 && (
+                <View style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  marginTop: 4,
+                  gap: 4,
+                }}>
+                  {Object.entries(msg.reacciones).map(([emoji, count]) => (
+                    <View key={emoji} style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      backgroundColor: "#1a1a1a",
+                      borderRadius: 12,
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
+                    }}>
+                      <Text style={{ fontSize: 14,lineHeight: 20 }}>{emoji}</Text>
+                      <Text style={{ color: "#fff", fontSize: 11, marginLeft: 3 }}>{count}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
                   {/* Menú — aparece al hacer long press */}
                   {msgMenuAbierto === msg.id && !msg.eliminado && (
                     <View style={{ alignSelf: msg.mio ? "flex-end" : "flex-start" }}>
+                      {/* Emojis de reacción */}
+                      <View style={{
+                        flexDirection: "row",
+                        backgroundColor: "#1a1a1a",
+                        borderRadius: 20,
+                        paddingHorizontal: 8,
+                        paddingVertical: 12,
+                        marginTop: 4,
+                        gap: 7,
+                        width: 260,
+                        justifyContent: "space-between",
+                        overflow: "visible", // ← agrega esto
+                      }}>
+                        {["❤️", "😂", "😮", "😢", "👍", "🔥"].map((emoji) => (
+                          <TouchableOpacity
+                            key={emoji}
+                            onPress={() => {
+                              reaccionarMensaje(msg.id, emoji);
+                              setMsgMenuAbierto(null);
+                            }}
+                          >
+                            <Text style={{ fontSize: 30,lineHeight: 32 }}>{emoji}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
                       {/* Reportar — para todos */}
                       <TouchableOpacity
                         onPress={() => handleReportar(msg)}

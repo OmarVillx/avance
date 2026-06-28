@@ -66,6 +66,23 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
         return { ...prev, [chatId]: actualizados };
       });
     });
+    // ── Reacción a mensaje ────────────────────────────────────────
+    socket.on("mensaje:reaccion", ({ msgId, chatId, emoji, count, quitar }) => {
+      setConversaciones((prev) => {
+        const msgs = prev[chatId] || [];
+        const actualizados = msgs.map((m) => {
+          if (String(m.id) !== String(msgId)) return m;
+          const reacciones = { ...(m.reacciones || {}) };
+          if (quitar && count === 0) {
+            delete reacciones[emoji];
+          } else {
+            reacciones[emoji] = count;
+          }
+          return { ...m, reacciones };
+        });
+        return { ...prev, [chatId]: actualizados };
+      });
+    });
     socket.on("presencia:cambio", ({ userId: uid, estado }) => {
       setContactos((prev) =>
         prev.map((c) => (String(c.id) === String(uid) ? { ...c, estado } : c))
@@ -140,6 +157,19 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
     },
     [chatActivo]
   );
+  const reaccionarMensaje = useCallback(
+  (msgId, emoji) => {
+    const socket = getSocket();
+    if (!socket || !chatActivo) return;
+    socket.emit("mensaje:reaccionar", {
+      msgId,
+      chatId: chatActivo.id,
+      emoji,
+      userId,
+    });
+  },
+  [chatActivo, userId]
+  );
   const mensajesActuales = chatActivo
     ? conversaciones[chatActivo.id] || []
     : [];
@@ -157,7 +187,8 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
       enviarMensaje,
       emitirEscribiendo,
       reportarMensaje,
-      eliminarMensaje, // ← nueva
+      eliminarMensaje,
+      reaccionarMensaje, 
       conectado,
       quienEscribe,
     }}

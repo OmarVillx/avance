@@ -3,6 +3,7 @@ import { Stack, usePathname, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ChatProvider } from "../context/ChatContext";
+import AppProvider from "../providers/AppProvider";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -11,8 +12,12 @@ export default function RootLayout() {
   const [nombreUsuario, setNombreUsuario] = useState("Yo");
 
   useEffect(() => {
-    AsyncStorage.getItem("userId").then(id => { if (id) setUserId(id); });
-    AsyncStorage.getItem("nombre_usuario").then(n => { if (n) setNombreUsuario(n); });
+    AsyncStorage.getItem("userId").then((id) => {
+      if (id) setUserId(id);
+    });
+    AsyncStorage.getItem("nombre_usuario").then((n) => {
+      if (n) setNombreUsuario(n);
+    });
   }, []);
 
   useEffect(() => {
@@ -43,9 +48,11 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ChatProvider userId={userId} nombreUsuario={nombreUsuario}>
-        <Stack screenOptions={{ headerShown: false }} />
-      </ChatProvider>
+      <AppProvider>
+        <ChatProvider userId={userId} nombreUsuario={nombreUsuario}>
+          <Stack screenOptions={{ headerShown: false }} />
+        </ChatProvider>
+      </AppProvider>
     </SafeAreaProvider>
   );
 }

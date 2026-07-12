@@ -10,10 +10,15 @@ import {
   View,
 } from "react-native";
 import { WebView } from "react-native-webview";
-import styles, { ColorLogin } from "./csslogin";
+import { useLanguageContext } from "../context/LanguageContext";
+import { useThemeContext } from "../context/ThemeContext";
+import createStyles, { ColorLogin } from "./csslogin";
 
 export default function Login() {
   const router = useRouter();
+  const { theme, isDark, toggleTheme } = useThemeContext();
+  const { t } = useLanguageContext();
+  const styles = createStyles(theme);
   const [isLoading, setIsLoading] = useState(false);
   const [showWebView, setShowWebView] = useState(false);
 
@@ -32,10 +37,10 @@ export default function Login() {
   const handleLoginSuccess = () => {
     setIsLoading(false);
     setShowWebView(false);
-    
+
     // Pequeño delay para que el Modal de iPhone se cierre limpio antes de navegar
     setTimeout(() => {
-      Alert.alert("✅ Bienvenido", "Autenticación UTP verificada");
+      Alert.alert(`✅ ${t("welcomeAlert")}`, t("successLogin"));
       router.replace("/genero");
     }, 100);
   };
@@ -77,11 +82,8 @@ export default function Login() {
           <Text style={styles.movil}>Movil</Text>
         </View>
 
-        <Text style={styles.title}>Bienvenido a UTP+Movil</Text>
-        <Text style={styles.subtitle}>
-          Conéctate con tu comunidad universitaria{"\n"}y vive la experiencia
-          UTP.
-        </Text>
+        <Text style={styles.title}>{t("welcome")}</Text>
+        <Text style={styles.subtitle}>{t("subtitle")}</Text>
 
         <View style={styles.spacing} />
 
@@ -94,18 +96,37 @@ export default function Login() {
           disabled={isLoading}
         >
           {isLoading ? (
-            <Text style={styles.utpText}>Conectando...</Text>
+            <Text style={styles.utpText}>{t("connecting")}</Text>
           ) : (
             <>
               <Ionicons name="school" size={24} color={ColorLogin.blanco} />
-              <Text style={styles.utpText}>Iniciar Sesión con UTP+Class</Text>
+              <Text style={styles.utpText}>{t("loginButton")}</Text>
             </>
           )}
         </TouchableOpacity>
-
-        <Text style={styles.infoText}>
-          Serás redirigido al portal de la UTP para verificar tu identidad
-        </Text>
+        <TouchableOpacity
+          onPress={toggleTheme}
+          style={{
+            marginTop: 20,
+            alignSelf: "center",
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            borderRadius: 10,
+            backgroundColor: theme.colors.card,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+          }}
+        >
+          <Text
+            style={{
+              color: theme.colors.text,
+              fontWeight: "bold",
+            }}
+          >
+            {isDark ? "☀️ Cambiar a modo claro" : "🌙 Cambiar a modo oscuro"}
+          </Text>
+        </TouchableOpacity>
+        <Text style={styles.infoText}>{t("redirect")}</Text>
       </View>
 
       {/* Modal con WebView para el SSO */}
@@ -120,8 +141,14 @@ export default function Login() {
               backgroundColor: "#111",
             }}
           >
-            <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>
-              Autenticación UTP
+            <Text
+              style={{
+                color: "white",
+                fontSize: 16,
+                fontWeight: "bold",
+              }}
+            >
+              {t("authentication")}
             </Text>
             <TouchableOpacity
               onPress={() => {
@@ -132,7 +159,7 @@ export default function Login() {
               <Text
                 style={{ color: "#E60023", fontSize: 16, fontWeight: "bold" }}
               >
-                Cancelar
+                {t("cancel")}
               </Text>
             </TouchableOpacity>
           </View>

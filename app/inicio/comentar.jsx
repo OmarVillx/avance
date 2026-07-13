@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   FlatList,
@@ -10,48 +10,18 @@ import {
   View,
 } from "react-native";
 import styles from "./csscomentar";
+import { useFeed } from "../../context/FeedContext";
 
 export default function Comentar() {
   const router = useRouter();
-
-  const [comentarios, setComentarios] = useState([
-    {
-      id: "1",
-      usuario: "CodeMaster",
-      avatar: "C",
-      texto: "¡Suerte en el parcial! 💪",
-      hora: "2h",
-    },
-    {
-      id: "2",
-      usuario: "MichiUTP",
-      avatar: "M",
-      texto: "Yo también lo llevo, ¿estudian juntos?",
-      hora: "1h",
-    },
-    {
-      id: "3",
-      usuario: "GamerUTP",
-      avatar: "G",
-      texto: "Ese profesor es imposible 😭",
-      hora: "45m",
-    },
-  ]);
-
+  const { postId } = useLocalSearchParams();
+  const { posts, addComment } = useFeed();
+  const post = posts.find((item) => String(item.id) === String(postId));
+  const comentarios = post?.comments ?? [];
   const [nuevoComentario, setNuevoComentario] = useState("");
 
   const agregarComentario = () => {
-    if (nuevoComentario.trim()) {
-      setComentarios([
-        ...comentarios,
-        {
-          id: Date.now().toString(),
-          usuario: "TzNakroth",
-          avatar: "T",
-          texto: nuevoComentario,
-          hora: "Ahora",
-        },
-      ]);
+    if (post && addComment(post.id, nuevoComentario)) {
       setNuevoComentario("");
     }
   };
@@ -74,7 +44,7 @@ export default function Comentar() {
           <View style={styles.commentItem}>
             <TouchableOpacity
               style={styles.avatarBtn}
-              onPress={() => router.push("/inicio/perfilusuario")}
+              onPress={() => router.push({ pathname: "/inicio/perfilusuario", params: { nombre: item.usuario } })}
             >
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>{item.avatar}</Text>
@@ -83,7 +53,7 @@ export default function Comentar() {
 
             <View style={styles.content}>
               <TouchableOpacity
-                onPress={() => router.push("/inicio/perfilusuario")}
+                onPress={() => router.push({ pathname: "/inicio/perfilusuario", params: { nombre: item.usuario } })}
               >
                 <Text style={styles.user}>{item.usuario}</Text>
               </TouchableOpacity>

@@ -11,18 +11,23 @@ import {
   View,
 } from "react-native";
 import { useBottomNav } from "../../hooks/useBottomNav";
+import { useFeed } from "../../context/FeedContext";
 import styles from "./csscrearpublicacion";
 
 export default function CrearPublicacion() {
   const router = useRouter();
   const { paddingBottom } = useBottomNav();
+  const { createPost, currentUser } = useFeed();
   const [texto, setTexto] = useState("");
+  const [categoria, setCategoria] = useState("General");
+  const categorias = ["General", "Académico", "Tecnología", "Social"];
 
   const publicar = () => {
     if (!texto.trim()) {
       Alert.alert("Error", "Escribe algo primero");
       return;
     }
+    createPost({ texto, categoria });
     Alert.alert("Éxito", "Publicación creada");
     router.back();
   };
@@ -39,9 +44,9 @@ export default function CrearPublicacion() {
 
       <View style={styles.userInfo}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>T</Text>
+          <Text style={styles.avatarText}>{currentUser.nombre.charAt(0).toUpperCase()}</Text>
         </View>
-        <Text style={styles.username}>TzNodSukao</Text>
+        <Text style={styles.username}>{currentUser.nombre}</Text>
       </View>
 
       <TextInput
@@ -52,6 +57,20 @@ export default function CrearPublicacion() {
         value={texto}
         onChangeText={setTexto}
       />
+
+      <View style={styles.categorySelector}>
+        {categorias.map((item) => (
+          <TouchableOpacity
+            key={item}
+            style={[styles.categoryButton, categoria === item && styles.categoryButtonActive]}
+            onPress={() => setCategoria(item)}
+          >
+            <Text style={[styles.categoryButtonText, categoria === item && styles.categoryButtonTextActive]}>
+              {item}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <View style={styles.options}>
         <TouchableOpacity style={styles.option}>

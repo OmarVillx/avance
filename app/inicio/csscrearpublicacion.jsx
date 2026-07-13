@@ -71,6 +71,32 @@ const styles = StyleSheet.create({
     minHeight: 150,
     marginBottom: 20,
   },
+  categorySelector: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  categoryButton: {
+    borderWidth: 1,
+    borderColor: "#444",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  categoryButtonActive: {
+    backgroundColor: "#E60023",
+    borderColor: "#E60023",
+  },
+  categoryButtonText: {
+    color: "#AAA",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  categoryButtonTextActive: {
+    color: "#FFF",
+  },
   options: {
     flexDirection: "row",
     justifyContent: "space-around",

@@ -33,6 +33,12 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     textAlign: "center",
   },
+  postCount: {
+    color: "#BBB",
+    fontSize: 14,
+    marginTop: -18,
+    marginBottom: 24,
+  },
   btn: {
     backgroundColor: "#E60023",
     paddingVertical: 15,

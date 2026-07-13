@@ -130,6 +130,12 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 20,
   },
+  emptyFeedText: {
+    color: "#888",
+    textAlign: "center",
+    marginTop: 30,
+    fontSize: 15,
+  },
   postHeader: {
     flexDirection: "row",
     justifyContent: "space-between",

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -9,81 +9,59 @@ import {
   View,
 } from "react-native";
 import { useBottomNav } from "../../hooks/useBottomNav";
+import { useFeed } from "../../context/FeedContext";
 import styles from "./cssinicio";
 
 export default function InicioFeed({ isTab = false, onGoToTab }) {
   const router = useRouter();
   const scrollRef = useRef(null);
   const { paddingBottom } = useBottomNav();
+  const { posts, votePost } = useFeed();
+  const [activeFilter, setActiveFilter] = useState("destacados");
 
   const scrollToTop = () => {
     scrollRef.current?.scrollTo({ x: 0, y: 0, animated: true });
   };
 
-  const historias = [
-    {
-      nombre: "Memes UTP",
-      imagen:
-        "https://i.pinimg.com/736x/9b/7e/16/9b7e168d3d4f17f4f2f7e6f4a7f6f0f1.jpg",
-    },
-    {
-      nombre: "Ing. Sistemas",
-      imagen:
-        "https://i.pinimg.com/736x/3b/e8/e8/3be8e8ec2c3a6f1f9f57c3f9d9d3f4a2.jpg",
-    },
-    {
-      nombre: "Gamers UTP",
-      imagen:
-        "https://i.pinimg.com/736x/9f/77/5b/9f775b6f4d7e4f4c7d4f7f4c7d4f7f4c.jpg",
-    },
-  ];
+  const historias = useMemo(
+    () => [...new Set(posts.map((post) => post.group).filter(Boolean))],
+    [posts],
+  );
 
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      usuario: "TzNakroth",
-      carrera: "4to ciclo • Ing. Sistemas",
-      texto:
-        "¿Alguien más sobreviviendo al parcial de Estructuras de datos? 😭💀",
-      categoria: "Académico",
-      colorCat: "#E60023",
-      likes: 128,
-      userVote: null,
-    },
-    {
-      id: 2,
-      usuario: "CodeMaster",
-      carrera: "6to ciclo • Ing. Sistemas",
-      texto: "Nuevo setup para programar de noche 🌙",
-      categoria: "Tecnología",
-      colorCat: "#9333EA",
-      likes: 128,
-      userVote: null,
-    },
-  ]);
-
-  const handleVote = (postId, type) => {
-    setPosts(
-      posts.map((post) => {
-        if (post.id === postId) {
-          let newLikes = post.likes;
-          let newUserVote = type;
-
-          if (post.userVote === type) {
-            // Quitar voto
-            newUserVote = null;
-            if (type === "up") newLikes -= 1;
-          } else {
-            // Cambiar o agregar voto
-            if (post.userVote === "up") newLikes -= 1;
-            if (type === "up") newLikes += 1;
-          }
-          return { ...post, likes: newLikes, userVote: newUserVote };
-        }
-        return post;
-      }),
-    );
+  const getRelativeTime = (createdAt) => {
+    if (!createdAt) return "";
+    const minutes = Math.max(0, Math.floor((Date.now() - createdAt) / 60000));
+    if (minutes < 1) return "Ahora";
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} h`;
+    return `${Math.floor(hours / 24)} d`;
   };
+
+  const visiblePosts = useMemo(() => {
+    const orderedPosts = [...posts];
+
+    if (activeFilter === "destacados") {
+      return orderedPosts.sort((first, second) => second.likes - first.likes);
+    }
+    if (activeFilter === "recientes") {
+      return orderedPosts.sort((first, second) => second.createdAt - first.createdAt);
+    }
+    if (activeFilter === "siguiendo") {
+      return orderedPosts.filter((post) => post.isFollowing);
+    }
+    if (activeFilter === "grupos") {
+      return orderedPosts.filter((post) => post.group);
+    }
+    return orderedPosts;
+  }, [activeFilter, posts]);
+
+  const filters = [
+    { id: "destacados", label: "DESTACADOS" },
+    { id: "recientes", label: "RECIENTES" },
+    { id: "siguiendo", label: "SIGUIENDO" },
+    { id: "grupos", label: "GRUPOS" },
+  ];
 
   const containerPaddingBottom = isTab ? 0 : paddingBottom;
 
@@ -98,6 +76,11 @@ export default function InicioFeed({ isTab = false, onGoToTab }) {
         <View style={styles.icons}>
           <TouchableOpacity onPress={() => router.push("/inicio/buscar")}>
             <Ionicons name="search-outline" size={26} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push({ pathname: "/inicio/verpublicaciones", params: { saved: "true" } })}
+          >
+            <Ionicons name="bookmark-outline" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
@@ -133,21 +116,21 @@ export default function InicioFeed({ isTab = false, onGoToTab }) {
             <View style={styles.storyCircle}>
               <Ionicons name="add" size={32} color="#E60023" />
             </View>
-            <Text style={styles.storyText}>Crear</Text>
+            <Text style={styles.storyText}>Crear publicación</Text>
           </TouchableOpacity>
 
-          {historias.map((item, index) => (
+          {historias.map((group) => (
             <TouchableOpacity
-              key={index}
+              key={group}
               style={styles.storyContainer}
-              onPress={() => router.push("/inicio/verpublicaciones")}
+              onPress={() => router.push({ pathname: "/inicio/verpublicaciones", params: { group } })}
             >
               <View style={styles.storyCircle}>
                 <Text style={styles.storyInitial}>
-                  {item.nombre ? item.nombre.charAt(0).toUpperCase() : ""}
+                  {group.charAt(0).toUpperCase()}
                 </Text>
               </View>
-              <Text style={styles.storyLabel}>{item.nombre}</Text>
+              <Text style={styles.storyLabel}>{group}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -158,30 +141,32 @@ export default function InicioFeed({ isTab = false, onGoToTab }) {
           showsHorizontalScrollIndicator={false}
           style={styles.tabs}
         >
-          <TouchableOpacity style={[styles.tabItem, styles.tabActive]}>
-            <Text style={styles.tabActiveText}>DESTACADOS</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabItem}>
-            <Text style={styles.tabText}>RECIENTES</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabItem}>
-            <Text style={styles.tabText}>SIGUIENDO</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabItem}>
-            <Text style={styles.tabText}>GRUPOS</Text>
-          </TouchableOpacity>
+          {filters.map((filter) => (
+            <TouchableOpacity
+              key={filter.id}
+              style={[styles.tabItem, activeFilter === filter.id && styles.tabActive]}
+              onPress={() => setActiveFilter(filter.id)}
+            >
+              <Text style={activeFilter === filter.id ? styles.tabActiveText : styles.tabText}>
+                {filter.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
 
         {/* POSTS */}
-        {posts.map((post) => (
+        {visiblePosts.map((post) => (
           <View key={post.id} style={styles.post}>
             <View style={styles.postHeader}>
               <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
                 <TouchableOpacity
                   style={[styles.avatar, { marginTop: 2 }]}
-                  onPress={() => router.push("/inicio/perfilusuario")}
+                  onPress={() => router.push({
+                    pathname: "/inicio/perfilusuario",
+                    params: { nombre: post.usuario, carrera: post.carrera },
+                  })}
                 >
-                  <Text style={styles.avatarText}>{post.usuario[0]}</Text>
+                  <Text style={styles.avatarText}>{post.usuario.charAt(0).toUpperCase()}</Text>
                 </TouchableOpacity>
                 <View style={{ marginLeft: 10 }}>
                   <Text style={styles.user}>{post.usuario}</Text>
@@ -189,9 +174,9 @@ export default function InicioFeed({ isTab = false, onGoToTab }) {
                 </View>
               </View>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={styles.time}>1h</Text>
+                <Text style={styles.time}>{getRelativeTime(post.createdAt)}</Text>
                 <TouchableOpacity
-                  onPress={() => router.push("/inicio/configuracion")}
+                  onPress={() => router.push({ pathname: "/inicio/configuracion", params: { postId: post.id } })}
                 >
                   <Ionicons
                     name="ellipsis-horizontal"
@@ -211,7 +196,7 @@ export default function InicioFeed({ isTab = false, onGoToTab }) {
 
             <View style={styles.actions}>
               <View style={styles.action}>
-                <TouchableOpacity onPress={() => handleVote(post.id, "up")}>
+                <TouchableOpacity onPress={() => votePost(post.id, "up")}>
                   <Ionicons
                     name={
                       post.userVote === "up" ? "arrow-up" : "arrow-up-outline"
@@ -231,7 +216,7 @@ export default function InicioFeed({ isTab = false, onGoToTab }) {
                   {post.likes}
                 </Text>
 
-                <TouchableOpacity onPress={() => handleVote(post.id, "down")}>
+                <TouchableOpacity onPress={() => votePost(post.id, "down")}>
                   <Ionicons
                     name={
                       post.userVote === "down"
@@ -246,15 +231,15 @@ export default function InicioFeed({ isTab = false, onGoToTab }) {
 
               <TouchableOpacity
                 style={styles.action}
-                onPress={() => router.push("/inicio/comentar")}
+                onPress={() => router.push({ pathname: "/inicio/comentar", params: { postId: post.id } })}
               >
                 <Ionicons name="chatbubble-outline" size={22} color="white" />
-                <Text style={styles.actionText}>45</Text>
+                <Text style={styles.actionText}>{post.comments?.length ?? 0}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.action}
-                onPress={() => router.push("/inicio/compartir")}
+                onPress={() => router.push({ pathname: "/inicio/compartir", params: { postId: post.id } })}
               >
                 <Ionicons name="share-social-outline" size={22} color="white" />
                 <Text style={styles.actionText}>Compartir</Text>
@@ -262,6 +247,10 @@ export default function InicioFeed({ isTab = false, onGoToTab }) {
             </View>
           </View>
         ))}
+
+        {visiblePosts.length === 0 && (
+          <Text style={styles.emptyFeedText}>No hay publicaciones para este filtro.</Text>
+        )}
       </ScrollView>
 
       {/* BOTTOM NAVIGATION BAR - Only rendered if NOT inside a parent tab shell */}

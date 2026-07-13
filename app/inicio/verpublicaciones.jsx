@@ -1,45 +1,46 @@
-import { useRouter } from "expo-router";
-import { FlatList, Image, SafeAreaView, Text, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { FlatList, SafeAreaView, Text, View } from "react-native";
+import { useFeed } from "../../context/FeedContext";
 import styles from "./cssverpublicaciones";
 
 export default function VerPublicaciones() {
-  const router = useRouter();
-  const posts = [
-    {
-      id: "1",
-      usuario: "CodeMaster",
-      texto: "Nuevo setup para programar de noche 🌙",
-      imagen:
-        "https://i.pinimg.com/originals/e4/6c/85/e46c8582d3282316c53543632162564f.jpg",
-      hora: "Hace 10 min",
-    },
-    {
-      id: "2",
-      usuario: "GamerUTP",
-      texto: "¿Alguien para rangear en Valorant?",
-      imagen: null,
-      hora: "Hace 30 min",
-    },
-  ];
+  const { postId, group, author, saved } = useLocalSearchParams();
+  const { posts, savedPostIds } = useFeed();
+  const visiblePosts = postId
+    ? posts.filter((post) => String(post.id) === String(postId))
+    : group
+      ? posts.filter((post) => post.group === group)
+      : author
+        ? posts.filter((post) => post.usuario === author)
+        : saved === "true"
+          ? posts.filter((post) => savedPostIds.includes(post.id))
+          : posts;
+  const title = postId
+    ? "Publicación"
+    : group
+      ? group
+      : author
+        ? `Publicaciones de ${author}`
+        : saved === "true"
+          ? "Guardados"
+          : "Feed en Vivo";
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Feed en Vivo</Text>
+        <Text style={styles.title}>{title}</Text>
       </View>
       <FlatList
-        data={posts}
+        data={visiblePosts}
         keyExtractor={(item) => item.id}
+        ListEmptyComponent={<Text style={styles.emptyText}>No hay publicaciones para mostrar.</Text>}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.user}>{item.usuario}</Text>
-              <Text style={styles.time}>{item.hora}</Text>
+              <Text style={styles.time}>{item.group ?? item.categoria}</Text>
             </View>
             <Text style={styles.text}>{item.texto}</Text>
-            {item.imagen && (
-              <Image source={{ uri: item.imagen }} style={styles.image} />
-            )}
           </View>
         )}
       />

@@ -1,11 +1,14 @@
 
 import { LanguageProvider } from "../context/LanguageContext";
 import { ThemeProvider } from "../context/ThemeContext";
+import { FeedProvider } from "../context/FeedContext";
 
 const AppProvider = ({ children }) => {
   return (
     <ThemeProvider>
-      <LanguageProvider>{children}</LanguageProvider>
+      <LanguageProvider>
+        <FeedProvider>{children}</FeedProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 };

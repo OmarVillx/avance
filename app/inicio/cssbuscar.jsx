@@ -70,6 +70,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 2,
   },
+  resultDescription: {
+    color: "#AAA",
+    fontSize: 13,
+    marginTop: 5,
+    paddingRight: 8,
+  },
+  emptyText: {
+    color: "#888",
+    textAlign: "center",
+    marginTop: 24,
+    fontSize: 15,
+  },
 });
 
 export default styles;

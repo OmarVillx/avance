@@ -28,30 +28,35 @@ export default function Usuario() {
     setLoading(true);
 
     try {
-      // 🔹 SIMULACIÓN: No hace fetch al backend, solo navega
-      console.log("📦 Datos a registrar (simulado):", {
-        nombre_usuario: cleanUser,
-        genero: params.genero,
-        intereses: params.intereses,
-        carrera: params.carrera,
-        ciclo: params.ciclo,
+      const response = await fetch("http://192.168.1.28:3000/api/registro", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre_usuario: cleanUser,
+          genero: params.genero,
+          intereses: params.intereses,
+          carrera: params.carrera,
+          ciclo: params.ciclo,
+        }),
       });
 
-      // Simular espera de "registro"
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const data = await response.json();
 
-      // Guardar userId falso en memoria (para que perfil.jsx funcione)
-      // Guardar datos del usuario en AsyncStorage
-      await AsyncStorage.setItem("userId", String(Date.now())); // ID único por usuario
+      if (!data.success) {
+        throw new Error(data.error);
+      }
+
+      await AsyncStorage.setItem("userId", String(data.userId));
       await AsyncStorage.setItem("nombre_usuario", cleanUser);
 
-      Alert.alert("✅ Éxito", "Registro completado (modo simulación)");
+      Alert.alert("✅ Éxito", "Registro completado");
 
-      // Navegar al inicio
       router.replace("/inicio/inicio");
     } catch (error) {
       console.error(error);
-      Alert.alert("⚠️ Error", "Algo salió mal");
+      Alert.alert("⚠️ Error", error.message);
     } finally {
       setLoading(false);
     }

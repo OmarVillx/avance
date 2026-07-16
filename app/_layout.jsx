@@ -1,12 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Stack, usePathname, useRouter } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ChatProvider } from "../context/ChatContext";
-import AppProvider from "../providers/AppProvider";
+import AppProvider from "../providers/AppProvider"; // ← agrega esta línea
+
 
 export default function RootLayout() {
-  const router = useRouter();
   const pathname = usePathname();
   const [userId, setUserId] = useState("1");
   const [nombreUsuario, setNombreUsuario] = useState("Yo");
@@ -47,12 +47,12 @@ export default function RootLayout() {
   }, [pathname]);
 
   return (
-    <SafeAreaProvider>
-      <AppProvider>
-        <ChatProvider userId={userId} nombreUsuario={nombreUsuario}>
-          <Stack screenOptions={{ headerShown: false }} />
-        </ChatProvider>
-      </AppProvider>
-    </SafeAreaProvider>
+  <SafeAreaProvider>
+    <AppProvider>
+      <ChatProvider userId={userId} nombreUsuario={nombreUsuario}>
+        <Stack screenOptions={{ headerShown: false }} />
+      </ChatProvider>
+    </AppProvider>
+  </SafeAreaProvider>
   );
 }

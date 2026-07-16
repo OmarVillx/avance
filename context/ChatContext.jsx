@@ -25,7 +25,11 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
     });
 
     socket.on("mensajes:historial", ({ chatId, mensajes }) => {
-      setConversaciones((prev) => ({ ...prev, [chatId]: mensajes }));
+      const mensajesConMio = mensajes.map((m) => ({
+      ...m,
+      mio: String(m.remitenteId) === String(userId),
+    }));
+      setConversaciones((prev) => ({ ...prev, [chatId]: mensajesConMio }));
     });
 
     socket.on("mensaje:nuevo", (msg) => {

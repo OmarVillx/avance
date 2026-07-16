@@ -28,7 +28,7 @@ export default function Usuario() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://192.168.1.28:3000/api/registro", {
+      const response = await fetch("https://backend-utp-movil-production.up.railway.app/api/registro", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

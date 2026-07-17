@@ -72,14 +72,15 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
     });
     // ── Chat privado creado ───────────────────────────────────────
     socket.on("chat:creado", ({ chatId }) => {
-      // Unirse a la room del chat recién creado
       socket.emit("chat:unirse", { chatId });
       
-      // Actualizar el chatActivo con el id real
       setChatActivoState((prev) => ({
         ...prev,
         id: chatId,
       }));
+
+      // Recargar lista de contactos
+      socket.emit("usuario:conectar", { userId, nombre: nombreUsuario });
     });
     // ── Reacción a mensaje ────────────────────────────────────────
     socket.on("mensaje:reaccion", ({ msgId, chatId, emoji, count, quitar }) => {

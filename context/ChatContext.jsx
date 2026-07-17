@@ -70,6 +70,13 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
         return { ...prev, [chatId]: actualizados };
       });
     });
+    // ── Chat privado creado ───────────────────────────────────────
+    socket.on("chat:creado", ({ chatId }) => {
+      const socket = getSocket();
+      if (socket) {
+        socket.emit("chat:unirse", { chatId });
+      }
+    });
     // ── Reacción a mensaje ────────────────────────────────────────
     socket.on("mensaje:reaccion", ({ msgId, chatId, emoji, count, quitar }) => {
       setConversaciones((prev) => {
@@ -161,6 +168,25 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
     },
     [chatActivo]
   );
+  const crearChatPrivado = useCallback(
+  (userId2, nombreContacto) => {
+    const socket = getSocket();
+    if (!socket) return;
+    socket.emit("chat:crear", {
+      userId1: userId,
+      userId2,
+    });
+    // Mientras se crea, preparamos el chat en el estado
+    const chatTemporal = {
+      id: `temp_${userId2}`,
+      nombre: nombreContacto,
+      tipo: "amigo",
+      estado: "En línea",
+    };
+    setChatActivoState(chatTemporal);
+  },
+  [userId]
+  );
   const reaccionarMensaje = useCallback(
   (msgId, emoji) => {
     const socket = getSocket();
@@ -193,6 +219,7 @@ export function ChatProvider({ children, userId = "1", nombreUsuario = "Yo" }) {
       reportarMensaje,
       eliminarMensaje,
       reaccionarMensaje, 
+      crearChatPrivado, // ← nueva
       conectado,
       quienEscribe,
     }}

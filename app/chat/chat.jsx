@@ -41,6 +41,7 @@ export default function Chat({ isTab = false, onGoToTab }) {
     reportarMensaje,
     eliminarMensaje,
     reaccionarMensaje,
+    crearChatPrivado, // ← nueva
   } = useChat();
 
   const [textoInput, setTextoInput] = useState("");
@@ -71,7 +72,8 @@ export default function Chat({ isTab = false, onGoToTab }) {
   };
 
   const handleIniciarChatPrivado = (contacto) => {
-    handleSeleccionarContacto(contacto);
+  crearChatPrivado(contacto.id, contacto.nombre);
+  setMostrarChat(true);
   };
 
   const handleEnviar = () => {

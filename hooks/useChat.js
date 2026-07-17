@@ -14,6 +14,7 @@ export function useChat() {
     reportarMensaje,
     eliminarMensaje,
     reaccionarMensaje,
+    crearChatPrivado, // ← nueva
   } = useChats();
 
   return {
@@ -29,5 +30,6 @@ export function useChat() {
     reportarMensaje,
     eliminarMensaje,
     reaccionarMensaje, 
+    crearChatPrivado, // ← nueva
   };
 }

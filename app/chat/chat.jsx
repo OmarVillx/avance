@@ -45,12 +45,11 @@ export default function Chat({ isTab = false, onGoToTab }) {
 
   const [textoInput, setTextoInput] = useState("");
   const [mostrarChat, setMostrarChat] = useState(false);
-  const [msgMenuAbierto, setMsgMenuAbierto] = useState(null); // id del msg con menu abierto
+  const [msgMenuAbierto, setMsgMenuAbierto] = useState(null);
 
   const amigos = contactos.filter((item) => item.tipo === "amigo");
   const grupos  = contactos.filter((item) => item.tipo === "grupo");
 
-  // paddingBottom dinámico: si el chat vive dentro de un tab, el propio tab maneja el espacio inferior
   const navPaddingBottom = isTab ? 0 : paddingBottom;
 
   const handleSeleccionarContacto = (item) => {
@@ -69,6 +68,10 @@ export default function Chat({ isTab = false, onGoToTab }) {
     } else {
       router.push("/inicio/inicio");
     }
+  };
+
+  const handleIniciarChatPrivado = (contacto) => {
+    handleSeleccionarContacto(contacto);
   };
 
   const handleEnviar = () => {
@@ -96,6 +99,7 @@ export default function Chat({ isTab = false, onGoToTab }) {
       ]
     );
   };
+
   const handleEliminar = (msg) => {
     Alert.alert(
       "Eliminar mensaje",
@@ -120,6 +124,7 @@ export default function Chat({ isTab = false, onGoToTab }) {
       ]
     );
   };
+
   return (
     <SafeAreaView style={[styles.container, { paddingBottom: navPaddingBottom }]} edges={["top"]}>
       {/* HEADER */}
@@ -206,11 +211,9 @@ export default function Chat({ isTab = false, onGoToTab }) {
             <View style={styles.chatHeaderInfo}>
               <Text style={styles.chatName}>{chatSeleccionado.nombre}</Text>
               <Text style={styles.chatStatus}>
-                {conectado
-                  ? "🟢 En línea"
-                  : chatSeleccionado.tipo === "grupo"
-                    ? "Chat grupal"
-                    : chatSeleccionado.estado}
+                {chatSeleccionado.tipo === "grupo"
+                  ? "Chat grupal"
+                  : chatSeleccionado.estado}
               </Text>
             </View>
             <Ionicons name="information-circle-outline" size={30} color="white" />
@@ -258,29 +261,26 @@ export default function Chat({ isTab = false, onGoToTab }) {
                       </Text>
                     </View>
                   </TouchableOpacity>
-              {/* Reacciones */}
-              {msg.reacciones && Object.keys(msg.reacciones).length > 0 && (
-                <View style={{
-                  flexDirection: "row",
-                  flexWrap: "wrap",
-                  marginTop: 4,
-                  gap: 4,
-                }}>
-                  {Object.entries(msg.reacciones).map(([emoji, count]) => (
-                    <View key={emoji} style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      backgroundColor: "#1a1a1a",
-                      borderRadius: 12,
-                      paddingHorizontal: 6,
-                      paddingVertical: 2,
-                    }}>
-                      <Text style={{ fontSize: 14,lineHeight: 20 }}>{emoji}</Text>
-                      <Text style={{ color: "#fff", fontSize: 11, marginLeft: 3 }}>{count}</Text>
+
+                  {/* Reacciones */}
+                  {msg.reacciones && Object.keys(msg.reacciones).length > 0 && (
+                    <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 4, gap: 4 }}>
+                      {Object.entries(msg.reacciones).map(([emoji, count]) => (
+                        <View key={emoji} style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          backgroundColor: "#1a1a1a",
+                          borderRadius: 12,
+                          paddingHorizontal: 6,
+                          paddingVertical: 2,
+                        }}>
+                          <Text style={{ fontSize: 14, lineHeight: 20 }}>{emoji}</Text>
+                          <Text style={{ color: "#fff", fontSize: 11, marginLeft: 3 }}>{count}</Text>
+                        </View>
+                      ))}
                     </View>
-                  ))}
-                </View>
-              )}
+                  )}
+
                   {/* Menú — aparece al hacer long press */}
                   {msgMenuAbierto === msg.id && !msg.eliminado && (
                     <View style={{ alignSelf: msg.mio ? "flex-end" : "flex-start" }}>
@@ -295,7 +295,7 @@ export default function Chat({ isTab = false, onGoToTab }) {
                         gap: 7,
                         width: 260,
                         justifyContent: "space-between",
-                        overflow: "visible", // ← agrega esto
+                        overflow: "visible",
                       }}>
                         {["❤️", "😂", "😮", "😢", "👍", "🔥"].map((emoji) => (
                           <TouchableOpacity
@@ -305,11 +305,12 @@ export default function Chat({ isTab = false, onGoToTab }) {
                               setMsgMenuAbierto(null);
                             }}
                           >
-                            <Text style={{ fontSize: 30,lineHeight: 32 }}>{emoji}</Text>
+                            <Text style={{ fontSize: 30, lineHeight: 32 }}>{emoji}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>
-                      {/* Reportar — para todos */}
+
+                      {/* Reportar */}
                       <TouchableOpacity
                         onPress={() => handleReportar(msg)}
                         style={{
@@ -329,6 +330,37 @@ export default function Chat({ isTab = false, onGoToTab }) {
                           Reportar mensaje
                         </Text>
                       </TouchableOpacity>
+
+                      {/* Iniciar chat privado — solo si no es tuyo */}
+                      {!msg.mio && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setMsgMenuAbierto(null);
+                            handleIniciarChatPrivado({
+                              id: msg.remitenteId,
+                              nombre: msg.remitente,
+                              tipo: "amigo",
+                              estado: "En línea",
+                            });
+                          }}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            backgroundColor: "#1a1a1a",
+                            borderRadius: 8,
+                            paddingHorizontal: 10,
+                            paddingVertical: 6,
+                            marginTop: 4,
+                            borderWidth: 1,
+                            borderColor: "#30D158",
+                          }}
+                        >
+                          <Ionicons name="person-add-outline" size={14} color="#30D158" />
+                          <Text style={{ color: "#30D158", fontSize: 12, marginLeft: 5 }}>
+                            Iniciar chat privado
+                          </Text>
+                        </TouchableOpacity>
+                      )}
 
                       {/* Eliminar — solo si es tuyo */}
                       {msg.mio && (
@@ -354,9 +386,9 @@ export default function Chat({ isTab = false, onGoToTab }) {
                       )}
                     </View>
                   )}
-                  </View>
-                  </View>
-                  ))}
+                </View>
+              </View>
+            ))}
 
             {quienEscribe && (
               <View style={[styles.messageRow, styles.messageLeft]}>

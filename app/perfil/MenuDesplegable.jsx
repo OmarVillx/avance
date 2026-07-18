@@ -2,21 +2,22 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
 import styles from "./cssMenuDesplegable";
 
-// ✅ Agregamos onEditarPerfil a las props
+// ✅ Agregamos onEditarPerfil, onPrivacidad y onGuardados a las props
 export default function MenuDesplegable({
   visible,
   onClose,
   onCerrarSesion,
   onEditarPerfil,
+  onPrivacidad,
+  onGuardados,
 }) {
   if (!visible) return null;
 
-  // ✅ Ahora la primera opción usa onEditarPerfil en lugar de onClose
   const opciones = [
     { icono: "create-outline", texto: "Editar perfil", accion: onEditarPerfil },
-    { icono: "lock-closed-outline", texto: "Privacidad", accion: onClose },
+    { icono: "lock-closed-outline", texto: "Privacidad", accion: onPrivacidad },
     { icono: "person-outline", texto: "Cuenta", accion: onClose },
-    { icono: "bookmark-outline", texto: "Guardados", accion: onClose },
+    { icono: "bookmark-outline", texto: "Guardados", accion: onGuardados },
   ];
 
   return (
@@ -25,7 +26,10 @@ export default function MenuDesplegable({
         <TouchableOpacity
           key={index}
           style={styles.opcion}
-          onPress={opcion.accion}
+          onPress={() => {
+            onClose();
+            if (opcion.accion) opcion.accion();
+          }}
         >
           <Ionicons name={opcion.icono} size={20} color="#8A8A8A" />
           <Text style={styles.opcionTexto}>{opcion.texto}</Text>

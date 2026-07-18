@@ -1,12 +1,14 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView, Text, TouchableOpacity } from "react-native";
 import styles from "./cssgenero";
 
 export default function Genero() {
   const router = useRouter();
+  const params = useLocalSearchParams();
 
   const handleSelect = (genero) => {
-    router.replace({ pathname: "/intereses", params: { genero } });  };
+    router.push({ pathname: "/intereses", params: { ...params, genero } });
+  };
 
   return (
     <SafeAreaView style={styles.container}>

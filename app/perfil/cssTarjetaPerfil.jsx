@@ -25,6 +25,11 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: "bold",
   },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 60,
+  },
   statusDot: {
     position: "absolute",
     bottom: 8,

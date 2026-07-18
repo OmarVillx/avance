@@ -70,6 +70,43 @@ const styles = StyleSheet.create({
     color: "#555",
     fontSize: 12,
   },
+  // Estado vacío
+  emptyContainer: {
+    alignItems: "center",
+    paddingVertical: 32,
+    paddingHorizontal: 20,
+    backgroundColor: "#0D0D0D",
+    borderRadius: 12,
+  },
+  emptyText: {
+    color: "#666",
+    fontSize: 17,
+    fontWeight: "700",
+    marginTop: 14,
+    textAlign: "center",
+  },
+  emptySubText: {
+    color: "#444",
+    fontSize: 13,
+    marginTop: 8,
+    textAlign: "center",
+    lineHeight: 18,
+  },
+  emptyBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E60023",
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 11,
+    marginTop: 18,
+    gap: 8,
+  },
+  emptyBtnText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
 });
 
 export default styles;

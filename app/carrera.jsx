@@ -40,7 +40,7 @@ export default function Carrera() {
   const handleContinuar = () => {
   if (!carreraSel || !cicloSel) return;
 
-  router.replace({
+  router.push({
     pathname: "/usuario",
     params: {
       ...params,

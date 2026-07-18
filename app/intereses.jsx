@@ -67,11 +67,12 @@ export default function Intereses() {
       <TouchableOpacity
         style={styles.nextButton}
         onPress={() =>
-          router.replace({
+          router.push({
           pathname: "/carrera",
           params: {
+            ...params,
             genero: params.genero,
-            intereses: JSON.stringify(selected),
+            intereses: selected.join(", "),
           },
         })
         }

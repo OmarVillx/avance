@@ -12,7 +12,7 @@ import { io } from "socket.io-client";
 // Ejemplo: "http://192.168.1.5:3000"
 // Para emulador Android en Android Studio: "http://10.0.2.2:3000"
 // Para web en Expo Go:                     "http://localhost:3000"
-export const SOCKET_URL = "https://backend-utp-movil-production.up.railway.app";
+export const SOCKET_URL = "https://front-backend-utp-movil-production.up.railway.app";
 
 let socket = null;
 

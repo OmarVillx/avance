@@ -28,7 +28,7 @@ export default function Usuario() {
     setLoading(true);
 
     try {
-      const response = await fetch("https://backend-utp-movil-production.up.railway.app/api/registro", {
+      const response = await fetch("https://front-backend-utp-movil-production.up.railway.app/api/registro", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,6 +39,8 @@ export default function Usuario() {
           intereses: params.intereses,
           carrera: params.carrera,
           ciclo: params.ciclo,
+          correo: params.correo,
+          password: params.password,
         }),
       });
 
@@ -50,6 +52,9 @@ export default function Usuario() {
 
       await AsyncStorage.setItem("userId", String(data.userId));
       await AsyncStorage.setItem("nombre_usuario", cleanUser);
+      if (data.token) {
+        await AsyncStorage.setItem("authToken", data.token);
+      }
 
       Alert.alert("✅ Éxito", "Registro completado");
 

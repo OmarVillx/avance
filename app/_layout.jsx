@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Stack, usePathname } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ChatProvider } from "../context/ChatContext";
@@ -8,6 +8,7 @@ import AppProvider from "../providers/AppProvider"; // ← agrega esta línea
 
 export default function RootLayout() {
   const pathname = usePathname();
+  const router = useRouter();
   const [userId, setUserId] = useState("1");
   const [nombreUsuario, setNombreUsuario] = useState("Yo");
 
@@ -23,22 +24,18 @@ export default function RootLayout() {
   useEffect(() => {
     const verificarSesion = async () => {
       try {
-        const userId = await AsyncStorage.getItem("userId");
-        const rutasRegistro = [
-          "/login",
-          "/genero",
-          "/intereses",
-          "/carrera",
-          "/usuario",
-        ];
+        const idSesion = await AsyncStorage.getItem("userId");
+        // "/genero" | "/intereses" | "/carrera" | "/usuario": pasos del
+        // registro que solo tienen sentido cuando TODAVÍA no hay cuenta.
+        const rutasRegistro = ["/cuenta", "/ingresar", "/verificar-correo", "/verificar-codigo", "/crear-cuenta", "/genero", "/intereses", "/carrera", "/usuario"];
         const esRutaRegistro = rutasRegistro.includes(pathname);
 
-        // Descomenta esto cuando tengas el backend conectado:
-        // if (!userId && !esRutaRegistro) {
-        //   router.replace("/login");
-        // } else if (userId && esRutaRegistro) {
-        //   router.replace("/inicio/inicio");
-        // }
+        if (!idSesion && pathname !== "/login" && !esRutaRegistro) {
+          router.replace("/login");
+        } else if (idSesion && (pathname === "/login" || esRutaRegistro)) {
+          // Ya tiene cuenta creada: que no vuelva a pasar por login/registro
+          router.replace("/inicio/inicio");
+        }
       } catch (error) {
         console.error("Error verificando sesión:", error);
       }

@@ -40,6 +40,28 @@ const styles = StyleSheet.create({
     color: "#8A8A8A",
     fontSize: 11,
   },
+  // Estado vacío
+  emptyContainer: {
+    alignItems: "center",
+    paddingVertical: 28,
+    paddingHorizontal: 20,
+    backgroundColor: "#0D0D0D",
+    borderRadius: 12,
+  },
+  emptyText: {
+    color: "#555",
+    fontSize: 15,
+    fontWeight: "600",
+    marginTop: 12,
+    textAlign: "center",
+  },
+  emptySubText: {
+    color: "#333",
+    fontSize: 12,
+    marginTop: 6,
+    textAlign: "center",
+    lineHeight: 18,
+  },
 });
 
 export default styles;
